@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head id="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily 10minute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    
+    <header id="header"></header>
+
+    <div class="main">
+        <div class="userHeader cleanFix">
+            <div class="userHeaderLeft">
+                <span id="nickNameTxt">닉네임</span><button id="logoutBtn">Logout</button>
+                <button id="reviewBtn">Review</button>
+                <button id="notificationBtn">안 읽은 알림 : ?개</button>
+            </div>
+            <div class="userHeaderRight">
+                
+                <label for=""><input type="text" id="keywordInput"></label><button id="searchBtn">검색</button>
+            </div>
+        </div>
+        <div id="mainVisual">
+            <div class="mask">
+                <ul class="swiper-wrapper">
+                    <li class="visual01 swiper-slide">
+                        <div class="bg"></div>
+                    </li>
+                    <li class="visual02 swiper-slide">
+                        <div class="bg"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="topicList">
+            <div class="title">
+                <h2>Project</h2>
+                <a href=""><p>더보기 <i class="xi-angle-right-min"></i></p></a>
+            </div>
+        	<div class="topicMask">
+                <ul id="projectList" class="swiper-wrapper clearFix">
+                	
+                </ul>
+            </div>
+            <div class="swiperBtn">
+                <button class="prevBtn"><i class="xi-angle-left"></i>
+                </button>
+                <button class="nextBtn"><i class="xi-angle-right"></i></button>
+            </div>
+        </div>
+        <!-- <div id="review">
+            <div class="title">
+                <h2>Review</h2>
+                <a href=""><p>더보기 <i class="xi-angle-right-min"></i></p></a>
+            </div>
+        </div> -->
+    </div>
+
+
+    <footer id="footer"></footer>
+    
+
+
+    <script>
+
+        $("#notificationBtn").click(function(){
+            $(location).attr('href',"notification_list.html");
+        })
+        $("#reviewBtn").click(function(){
+            location.href='reviews.html';
+        })
+
+
+        $("#searchBtn").click(function(){
+            let searchKeyword = $("#keywordInput").val();
+            if(searchKeyword.length<1){
+                alert("키워드를 입력해주세요.");
+                return;
+            }
+
+
+            $(location).attr('href',`search.html?keyword=${searchKeyword}`);
+        })
+
+
+
+
+        let loginUser = JSON.parse(localStorage.getItem('userInfo'));
+        $("#nickNameTxt").text(`${loginUser.nick_name}님 안녕하세요!`);
+
+
+        $("#profileBtn").click(function(){
+            $(location).attr('href','my_profile.html');
+        })
+
+
+        console.log('메인에서의 쿠키 : ', $.cookie('userToken'))
+    
+        axiosInstance.get("/notification")
+        .then(function(res){
+            console.log("알림내역",res);
+
+            let notiCount = res.data.data.unread_noty_count;
+            if(notiCount ==0){
+                $("#notificationBtn").text("모든 알림 확인 완료");
+            }
+            else{
+                $("#notificationBtn").text(`안 읽은 알림 : ${notiCount}개`);
+            }
+        })
+        .catch(function(err){
+            console.log(err);
+            $("notificationBtn").hidden();
+        })
+        
+    
+        axiosInstance.get('/project', {
+            params: {
+            }
+        })
+        .then(function (res) {
+
+            res.data.data.projects.forEach(project=> {
+                console.log(project);
+                $("#projectList").append(`
+                <li project_id = ${project.id} class="swiper-slide">
+                    <img class = "projectListItem" src='${project.img_url}'> 
+                    <p>${project.title}</p>
+                </li>`)
+            });
+
+            $("#projectList li").click(function(){
+
+                let projectId =  $(this).attr("project_id");
+
+                $(location).attr('href',`project_detail.html?id=${projectId}`);
+            })
+
+        })
+        .catch(function(error){
+            alert(error.response.data.message);
+        })
+    
+    </script>
+</body>
+</html>
+

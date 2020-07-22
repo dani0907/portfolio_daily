@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily 10minute</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+
+</head>
+<body>
+    
+
+    <script>
+        if($.cookie('userToken')){
+            axiosInstance.get('/my_info',{
+                params:{
+
+                }
+            })
+            .then(function(res){
+                console.log('내정보: ',res.data.data.user);
+
+                let userInfoStr = JSON.stringify(res.data.data.user);
+                
+                localStorage.setItem('userInfo', userInfoStr);
+
+                $(location).attr('href','main.html');
+            })
+            .catch(function(error){
+                $(location).attr('href','login.html');
+            })
+    
+        }
+        else{
+            $(location).attr('href','login.html');
+        }
+    </script>
+</body>
+</html>
+
+

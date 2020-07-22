@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily 10minute</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    <header id="header"></header>
+    <div id="viewProjectProof">
+        <div class="inner">
+            <div class="wrapper">
+                <h1 class="title">다른 사람들의 인증 내역</h1>
+                <label for="date"><span>인증 확인 날짜</span><input id="date" type="date"></label>
+            
+                <ul id="proofList">
+                   
+                </ul>
+            </div>
+        </div>
+    </div>
+    <footer id="footer"></footer>
+    <script>
+            let searchParams = new URLSearchParams(window.location.search)
+            let projectId = searchParams.get('project_id')
+            
+            
+            $("#date").change(function(){
+                let proofDate = $(this).val();
+
+                $("#proofList").empty();
+
+                axiosInstance.get(`/project/${projectId}`, {
+                    params: {
+                        'proof_date':proofDate
+                    }
+                })
+                .then(function (res) {
+
+                    res.data.data.project.proofs.forEach(proof => {
+
+
+                        console.log(proof);
+                        let likeCount = proof.like_count;
+                        let likeButtonTitle ="좋아요";
+
+                        let replyBtnTitle=`댓글 : ${proof.reply_count}`;
+
+                        if(proof.my_like){
+                            likeButtonTitle = "좋아요 취소";
+                        }
+
+                        if(proof.images.length > 0){
+                            $("#proofList").append(`<li proof_id=${proof.id}>
+                                                    <div class="imgBox">
+                                                        <img src=${proof.images[0].img_url}>
+                                                    </div>
+                                                        <div class="textBox clearFix"><p>${proof.content}</p>
+                                                        <div class ="likeWrapper"><button class='likeBtn'>${likeButtonTitle}</button>
+                                                        <span class="likeCount">${likeCount}개</span>
+                                                        <button class="replyBtn">${replyBtnTitle}</button></div>
+                                                        </div>
+                                                    
+                                                </li>`)
+                        }
+                        else{
+                            $("#proofList").append(`<li proof_id=${proof.id}>
+                                                    <div class="imgBox"></div>
+                                                    <div class="textBox clearFix">
+                                                        <p>${proof.content}</p>
+                                                        <div class="likeWrapper"><button class='likeBtn'>${likeButtonTitle}</button>
+                                                        <span class="likeCount">${likeCount}개</span><button class="replyBtn">${replyBtnTitle}</button></div>
+                                                    </div>
+                                                </li>`)
+                        }
+                        
+                    });
+
+
+                    $(".replyBtn").click(function(){
+                        let proofId = $(this).parents('li').attr('proof_id')
+                        console.log("눌린 버튼의 인증글 Id : " ,proofId);
+
+                        $(location).attr('href',`view_proof.html?proof_id=${proofId}`);
+                    })
+
+                    $(".likeBtn").click(function(){
+                        let proofId = $(this).parents('li').attr('proof_id')
+                        const form = new FormData();
+
+                        form.append("proof_id",proofId);
+                
+                        let likeBtn = $(this);
+
+                        axiosInstance.post('/like_proof', form)
+                            .then(function(res){
+
+                                alert(res.data.message);
+                                
+
+                                let count = res.data.data.like.like_count;
+                                let buttonTitle = "좋아요";
+                                if(res.data.data.like.my_like){
+                                    buttonTitle="좋아요 취소";
+                                }
+
+
+                                likeBtn.text(buttonTitle);
+
+                                likeBtn.siblings(".likeCount").text(`${count}개`);
+
+
+                            })
+                        .catch(function(error){
+                            alert(error.response.data.message);
+                        })
+                    
+
+                    })
+
+                    
+                })
+                .catch(function (error) {
+                    alert(error.response.data.message)
+                })
+
+            })
+            
+           let now = new Date;
+           let year = now.getFullYear();
+           let month = String(now.getMonth()+1).padStart(2,"0");
+           let day = String(now.getDate()).padStart(2,"0");
+
+           let today = `${year}-${month}-${day}`;
+
+           console.log(today);
+
+           $("#date").val(today);
+           $("#date").trigger("change");
+
+    </script>
+    
+</body>
+</html>
+

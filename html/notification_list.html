@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head id="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily 10minute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    <header id="header"></header>
+
+    <div class="main">
+        <p>알림 목록 화면(최근 50개의 알림만 지원됩니다.</p>
+        <ul id="notificationList">
+
+        </ul>
+
+    <footer id="footer"></footer>
+    
+
+
+    <script>
+
+        axiosInstance.get('/notification')
+        .then(function (res) {
+
+            if(res.data.data.notifications.length>0){}
+            let lastNotiId = res.data.data.notifications[0].id;
+            console.log("최신알림id:",lastNotiId);
+
+            let form = new FormData();
+            form.append('noti_id',lastNotiId);
+
+            axiosInstance.post('/notification',form)
+            .then(function(res){
+                console.log(res);
+            })
+            .catch(function(err){
+                console.log(err);
+            })
+
+            console.log("최신 알림 id : ",res.data.data.notifications[0].id);
+            res.data.data.notifications.forEach(noti => {
+
+                console.log(noti)
+
+                let notiItem = $(`
+                <li target_id=${noti.focus_object_id} noti_type=${noti.type} goto_ui=${noti.reference_ui}>
+                    ${noti.title}
+                </li>
+                `)
+
+                $('#notificationList').append(notiItem)
+
+            });
+
+            $('#notificationList li').click(function () {
+
+                let gotoUi = $(this).attr('goto_ui')
+
+                if (gotoUi == 'ProofDetail') {
+
+                    let proofId = $(this).attr('target_id')
+
+                    location.href = `view_proof.html?proof_id=${proofId}`
+
+                }
+                else if (gotoUi == 'ReviewDetail') {
+                    let reviewId = $(this).attr("target_id");
+
+                    location.href=`review_detail.html?review_id=${reviewId}`;
+
+                }
+                else {
+                    alert('잘못된 접근입니다.')
+                }
+
+            })
+
+        })
+        .catch(function (error) {
+            console.log(error)
+        }) 
+        
+    
+    
+    </script>
+</body>
+</html>
+

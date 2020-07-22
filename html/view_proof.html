@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    <header id="header"></header>
+    <div id="viewProofPage">
+        <div class="inner">
+            <div class="wrapper">
+                <h1>인증글 상세보기</h1>
+                
+                <div id="imgList">
+
+                </div>
+                <p id="write_nick"></p>
+                <p id="content">인증글 내용</p>
+                <div class="likeWrap">
+                    <button id="likeBtn">좋아요</button>
+                    <span id="likeCount">?명이 좋아합니다</span>
+                </div>
+
+                <div id="reReplyDiv">
+                    <p>
+                        <span id="parentReplyWriter">~~</span>에게 답글 다는 중
+                        <button id="cancelReReplyBtn">답글 취소</button>
+                    </p>
+                </div>
+
+                <label for="replyContent"><input type="text" id="replyContent" placeholder="내용을 입력하세요."></label><button id="replyBtn">댓글달기</button>
+                <ul id="replyList">
+
+                </ul>
+
+            </div>
+        </div>
+    </div>
+    <footer id="footer"></footer>
+
+    <script>
+        $('#reReplyDiv').hide();
+
+        
+        let searchParams = new URLSearchParams(window.location.search);
+        let proofId = searchParams.get('proof_id');
+
+        let parentReplyId = -1;
+
+        $('#cancelReReplyBtn').click(function(){
+
+            parentReplyId = -1;
+            $('#reReplyDiv').hide();
+        })
+
+
+        $('#likeBtn').click(function() {
+
+            let form = new FormData()
+            form.append('proof_id', proofId)
+
+            axiosInstance.post('/like_proof', form)
+                .then(function (res) {
+
+                    console.log(res)
+
+                    alert(res.data.message)
+
+                    let myLike = res.data.data.like.my_like;
+                    let likeCount = res.data.data.like.like_count;
+
+                    if (myLike) {
+                        $('#likeBtn').text("좋아요 취소")
+                    }
+                    else {
+                        $('#likeBtn').text("좋아요")
+                    }
+
+                    $('#likeCount').text(`${likeCount}명이 좋아합니다.`)
+
+                })
+                .catch(function (error) {
+                    alert(error.response.data.message)
+                })
+            })
+
+        function getProofInfoFromServer(){
+            axiosInstance.get(`/project_proof/${proofId}`, {
+                    params: {
+                    }
+                })
+                .then(function (res) {
+
+                    console.log(res)
+
+                    let userNickName = res.data.data.project.user.nick_name;
+                    $("#write_nick").text(userNickName);
+
+                    let content = res.data.data.project.content
+                    $('#content').text(content)
+
+                    $("#imgList").empty();
+
+                    res.data.data.project.images.forEach(photo => {
+
+                        console.log(photo)
+
+                        $('#imgList').append(`
+                        <img class='proofImgItem' src=${photo.img_url}>
+                        `)
+
+                    });
+
+                    let myLike = res.data.data.project.my_like;
+                    let likeCount = res.data.data.project.like_count;
+
+
+                    if(myLike){
+                        $("#likeBtn").text("좋아요 취소")
+                    }
+                    else{
+                        $("#likeBtn").text("좋아요")
+                    }
+                    
+                    $("#likeCount").text(`${likeCount}명이 좋아합니다.`);
+
+                    $("#replyList").empty()
+
+                    res.data.data.project.replies.forEach(reply => {
+                        console.log('댓글 정보 : ', reply);
+
+                        let title = "좋아요";
+                        if(reply.my_like){
+                            title="좋아요 취소"
+                        }
+
+                        let replyItem = $(`
+                            <li reply_id=${reply.id}>
+                                <p><span class='userNickName'>${reply.user.nick_name}</span>${reply.content}</p>
+                                <button class="replyLikeBtn">${title}</button>
+                                <button class="reReplyBtn">답글달기</button>
+                                <ul class='reReplyUl'></ul>
+                            </li>
+                        `)
+                        $("#replyList").append(replyItem);
+                       
+                        reply.re_replies.forEach(rr => {
+                            console.log(`${reply.content}의 답글:`,rr.content);
+
+                            let reReplyUl = replyItem.children('.reReplyUl');
+
+                            let replyLikeBtn = "좋아요";
+                            if(rr.my_like){
+                                replyLikeBtn="좋아요 취소";
+                            }
+
+
+                            let reReplyItem = $(`
+                            <li re_reply=${rr.id}>
+                                <p><span class = "userNickName">${rr.user.nick_name}</span>
+                                ${rr.content}
+                                <button class="reReplyLikeBtn">좋아요</button></p>
+                            </li>
+                            `);
+                            reReplyUl.append(reReplyItem);
+                        });
+                    });
+
+
+                        $('.reReplyLikeBtn').click(function(){
+                             let reReplyId = $(this).parents('li').attr('re_reply');
+                             console.log(reReplyId);
+
+
+                             let clickedBtn = $(this);
+
+                             let form = new FormData()
+                                form.append('proof_reply_id', reReplyId)
+
+                                axiosInstance.post('/like_proof_reply', form)
+                                    .then(function (res) {
+
+                                        console.log(res)
+
+                                        alert(res.data.message)
+
+                                        let replyLikeBtn = "좋아요"
+                                        if(res.data.data.like.my_like){
+                                            replyLikeBtn="좋아요 취소"
+                                        }
+
+                                       
+
+                                    })
+                                    .catch(function (error) {
+                                        alert(error.response.data.message)
+                                    })
+                        })
+
+                    $('.reReplyBtn').click(function(){
+                        let nickName = $(this).siblings().children('.userNickName').text();
+                        $('#parentReplyWriter').text(nickName);
+                        parentReplyId = $(this).parents('li').attr('reply_id');
+                        console.log('답글달댓글아이디:',parentReplyId);
+                        $('#reReplyDiv').show();
+                    })
+
+
+                    $(".replyLikeBtn").click(function(){
+                        let clickedBtn = $(this)
+
+                        let replyId = $(this).parents("li").attr("reply_id");
+                        console.log("몇번댓글:",replyId);
+
+                        let form = new FormData();
+                        form.append('proof_reply_id',replyId);
+
+                    axiosInstance.post('/like_proof_reply', form)
+                        .then(function (res) {
+
+                            console.log(res);
+                            alert(res.data.message);
+
+                            let replyLikeBtn = "좋아요";
+                            if(res.data.data.like.my_like){
+                                replyLikeBtn="좋아요 취소";
+                            }
+                            clickedBtn.text(replyLikeBtn);
+                        })
+                        .catch(function (error) {
+                            alert(error.response.data.message)
+                        })
+                    })
+
+                })
+                .catch(function (error) {
+                    alert(error.response.data.message)
+                })
+
+        }
+
+        getProofInfoFromServer();
+       
+                $("#replyBtn").click(function(){
+                    let content = $("#replyContent").val();
+                    console.log('replyContent:' ,content)
+                    if(content==""){
+                        alert("내용을 입력하세요.")
+                        return;
+                    }
+
+                    let form = new FormData();
+                    if(parentReplyId ==-1){
+                        form.append("proof_id",proofId);
+                    }
+                    else{
+                        form.append('parent_reply_id',parentReplyId);
+                    }
+                    
+                    form.append("content",content)
+                    axiosInstance.post('/proof_reply', form)
+                        .then(function(res){
+                          console.log(res)
+                          alert(res.data.message)
+
+                        $("#replyContent").val("")
+
+                        getProofInfoFromServer();
+
+                        $('#reReplyDiv').hide();
+                        parentReplyId=-1;
+
+
+                        })
+                    .catch(function(error){
+                        alert(error.response.data.message)
+                    })
+                })
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js"defer></script>
+</head>
+<body>
+    <header id="header"></header>
+    <div id="myProfilePage">
+        <div class="inner">
+            <div class="wrapper">
+                <h1 class="title">My profile</h1>
+                <div id="nickNameChange">
+                    <div class="nickDiv">
+                        <span class="nick">닉네임 </span><span id="nickNameSpan"></span>
+                    </div>
+                    <label for="newNickNameInput" class="nickDiv"><span class="nick">새 닉네임 </span> <input type="text" id="newNickNameInput" placeholder="변경할 닉네임 입력"><button id="changeNickBtn">닉네임 변경</button></label>
+
+                </div>
+                <div id="pwChange">
+                    <label for="currentPwInput"><span>기존 비밀번호 입력</span><input type="password" id="currentPwInput"placeholder="사용중인 비밀번호"></label>
+
+                    <label for="newPwInput"><span>새 비밀번호 입력 </span> <input type="password" id="newPwInput" placeholder="변경할 비밀번호 입력"></label>
+                    <p id="pwStatusTxt">비밀번호를 입력해주세요</p>
+
+                    <label for="newPwConfirmInput"><span>새 비밀번호 확인 </span> <input type="password" id="newPwConfirmInput" placeholder="변경할 비밀번호 확인"></label>
+                    <p id="pwConfirmStatusTxt">비밀번호 확인을 입력해주세요</p>
+
+                    <button id="changePwBtn">비밀번호 변경</button>
+
+                </div>
+
+                <div id="pImgChange">
+                    <h2 class="title">My Profile Images</h2>
+                    <form id="profileImgUploadForm">
+                        <label for=""><span>추가할 프로필 사진 첨부</span><input name="profile_images" type="file" accept="image/*"></label>
+                    </form>
+                    
+                    <button id="uploadProfileBtn">프사 업로드</button>
+                    
+                    <div id="profileImagesDiv">
+    
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer id="footer"></footer>
+    
+    <script>
+
+        $("#changePwBtn").click(function(){
+            $(location).attr("href","change_pw.html");
+        })
+
+        $("#uploadProfileBtn").click(function(){
+            const form = new FormData($("#profileImgUploadForm")[0]);
+            axiosInstance.put('/user_profile_image', form)
+                .then(function (res) {
+
+                    alert("프로필 사진을 추가 했습니다.");
+                    location.reload();
+
+                })
+                .catch(function (error) {
+                    alert(error.response.data.message)
+                })
+        })
+
+        $("#changeNickBtn").click(function(){
+            let newNickName = $("#newNickNameInput").val();
+
+            if(newNickName.length<5){
+                alert("닉네임은 5글자 이상이어야 합니다.");
+                return
+            }
+             const form = new FormData();
+            form.append("nick_name", newNickName);
+     
+    
+            axiosInstance.patch('/user', form)
+                .then(function(res){
+                    let token = res.data.data.token;
+    
+                    $.cookie("userToken",token);
+    
+                    console.log("쿠키에 저장된 토큰 : ", $.cookie('userToken'))
+    
+                    $(location).attr('href','main.html');
+                })
+            .catch(function(error){
+                alert(error.response.data.message);
+            })
+    
+        })
+    </script>
+    <script>
+
+        axiosInstance.get('/my_info',{
+            params:{
+                'project_status':"ONGOING"
+            }
+        })
+        .then(function(res){
+            console.log(res);
+
+            let loginUser = res.data.data.user;
+
+            console.log("로그인사용자:",loginUser);
+
+
+            let nickName = loginUser.nick_name
+            $('#nickNameSpan').text(nickName);
+
+
+            loginUser.profile_images.forEach(pfImg => {
+                console.log( '프사:',pfImg);
+                
+                let pfImage = $(`
+                <div class="pfImgBox"><img img_id=${pfImg.id} class = 'userProfileImg' src=${pfImg.img_url}></div>
+                `)
+
+                $("#profileImagesDiv").append(pfImage);
+                
+            });
+
+            $(".userProfileImg").click(function(){
+                let imageId = $(this).attr("img_id");
+                console.log(imageId);
+
+                let deleteOk = confirm('정말 해당 사진을 삭제하시겠습니까?');
+
+                if(deleteOk){
+                    axiosInstance.delete('/user_profile_image',{
+                        params:{
+                            'image_id':imageId
+                        }
+                    })
+                    .then(function(res){
+                        console.log(res);
+                        alert("프사를 삭제했습니다.");
+                        location.reload();
+                    })
+                    .catch(function(err){
+                        console.log(err);
+                    })
+                }
+            })
+           
+        })
+        .catch(function(error){
+            alert(error);
+        })
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    <header id="header"></header>
+    <div id="userListPage">
+        <div class="inner">
+            <div class="wrapper">
+                
+                <h1 class="title">참여중인 사람들</h1>
+            
+                <ul id="onGoingUserListUl">
+            
+                </ul>
+            </div>
+        </div>
+    
+    </div>
+
+
+    <script>
+            let searchParams = new URLSearchParams(window.location.search)
+            let projectId = searchParams.get('project_id')
+            
+            axiosInstance.get(`/project/${projectId}`, {
+                params: {
+                    'need_user_list' : true
+                }
+            })
+            .then(function (res) {
+
+
+                res.data.data.project.ongoing_users.forEach(user => {
+
+                    console.log('참여자: ',user)
+                    
+                    let userInfoLi=$(
+                        `
+                        <li class='userListItem'>
+                        <div class="imgBox"><img src=${user.profile_images[0].img_url}></div>
+                        <div class="textBox">
+                            <span class="userNickName">${user.nick_name}</span>
+                            <span class="projectDay">도전 ${user.project_days}일차</span>
+                            <span class="proofDay">인증 ${user.project_proof_days}일차</span>
+                        </div>
+                        </li>
+                        `
+                    )
+
+                    $('#onGoingUserListUl').append(userInfoLi);
+                });
+                
+            })
+            .catch(function (error) {
+                alert(error.response.data.message)
+            })
+
+    </script>
+</body>
+</html>

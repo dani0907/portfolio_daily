@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head id="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily 10minute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    
+    <!-- <header id="header"></header> -->
+
+    <div id="searchPage">
+        <div class="inner">
+            <div class="wrapper">
+                <p>
+                    검색결과 / 키워드 : <span id="keywordSpan">??</span>
+                </p>
+                <ul>
+                    <li class="parent">
+                        <p>프로젝트 목록</p>
+                        <ul id="projectListUl">
+            
+                        </ul>
+                    </li>
+                    <li class="parent">
+                        <p>태그 목록</p>
+                        <ul id="tagListUl">
+
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    
+    </div>
+
+    <footer id="footer"></footer>
+    
+
+
+    <script>
+
+        
+        let searchParams = new URLSearchParams(window.location.search)
+
+        let searchKeyword = searchParams.get('keyword')
+
+        $("#keywordSpan").text(searchKeyword);
+
+
+        axiosInstance.get('/search', {
+            params: {
+                'keyword': searchKeyword
+            }
+        })
+        .then(function (res) {
+
+           console.log(res);
+
+           let projectList = res.data.data.projects;
+
+        projectList.forEach(project => {
+            console.log(project);
+
+            let projectLi = $(`
+            <li project_id=${project.id} class="projectLink">
+                <p>${project.title}</p>
+            </li>
+            `)
+
+            $("#projectListUl").append(projectLi);
+        });
+
+
+        let tagList = res.data.data.tags;
+        tagList.forEach(tag => {
+            console.log("태그",tag);
+
+            let tagLi = $(`
+            <li tag_id=${tag.id} class="projectLink">
+                <span>${tag.title}</span>
+                <ul class="tagProjectUl"></ul>
+            </li>
+            `)
+
+            let tagProjectUl = tagLi.children('.tagProjectUl');
+
+
+            tag.projects.forEach(project => {
+                
+                console.log(project);
+
+                let tagProjectLi = $(`
+                <li project_id=${project.id} class="projectLink">
+                    <span>${project.title}</span>
+                </li>
+                `)
+
+                tagProjectUl.append(tagProjectLi);
+
+
+
+            });
+            $("#tagListUl").append(tagLi);
+
+        });
+
+        $(".projectLink").click(function(){
+            let projectId = $(this).attr('project_id')
+
+            console.log(projectId);
+
+            $(location).attr(`href','project_detail.html?id=${projectId}`);
+        })
+
+        })
+        .catch(function(error){
+            alert(error.response.data.message);
+        })
+    
+    </script>
+</body>
+</html>
+

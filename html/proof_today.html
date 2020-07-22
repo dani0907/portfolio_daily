@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/custom_axios.js" defer></script>
+</head>
+<body>
+
+    <div class="" id="proofTodayPage">
+        <div class="inner">
+           
+            <div class="wrapper">
+                <a href="../html/main.html"><img class="logo" src="../images/layout/daily10min_dark.png" alt=""></a>
+                <h1 class="title">Today's Check</h1>
+
+                <form id="proofForm">
+                    <label for=""><span>인증내용</span><input name="content" type="text" placeholder="인증메세지 입력"></label>
+                    <label for=""><span>인증샷 첨부</span><input name="proof_images" type="file"></label>
+                </form>
+                <button id="proofButton">Check</button>
+            
+            </div>
+            
+        </div>
+    </div>
+    
+
+    <script>
+        $('#proofButton').click(function() {
+            const form = new FormData($('#proofForm')[0])
+
+            let searchParams = new URLSearchParams(window.location.search)
+            let projectId = searchParams.get('project_id')
+
+            form.append('project_id', projectId)
+
+            axiosInstance.post('/project_proof', form)
+                .then(function (res) {
+
+                    console.log(res)
+                    alert("오늘의 인증을 완료했습니다.");
+                    location.href=`project_detail.html?id=${projectId}`;
+
+                })
+                .catch(function (error) {
+                    alert(error.response.data.message)
+                })
+        })
+
+    </script>
+</body>
+</html>
+

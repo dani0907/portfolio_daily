@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily 10minute</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/greensock/gsap.min.js"></script>
+    <script src="../js/swiper.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+    <header id="header"></header>
+
+    <div id="projectDetail">
+        <div class="inner">
+            <div class="wrapper clearFix">
+                <h1 id="title"></h1>
+                
+                <div class="imgWrapper">
+                    <img src="" alt="" id="projectImg">
+                </div>
+                <div class="textWrapper">
+                    <div class="descriptionDiv">
+                        <p id="description"></p>
+                    </div>
+                    <div id="tagsDiv"></div>
+                    
+                    <p id="proofmethod"></p>
+                   
+                    <div id="apply">
+                        <span id="userCount">현재 참여 인원</span>
+                        <button id="applyButton">신청하기</button>
+                        <button id="giveUpButton">중도 포기하기</button>
+                    </div>
+                    <div id="completeInfo">
+                        <p class="completeTitle">습관으로 만드는데 성공한 프로젝트입니다!</p>
+                        <p class="completeTotalDay"><span class="bold">총 소요 기간 :</span> <span id="totalDaySpan">?일</span></p>
+                        <p class="completeProof"><span class="bold">인증</span> <span id="proofPercentSpan">?%</span></p>
+                        <button id="completeProofsBtn">인증한 내역 확인하기</button>
+                    </div>
+                    <div class="btnUtil">
+                        <a id="proofButton">인증하기</a>
+                        <a id="viewProofButton">다른 사람들의 인증 내역</a>
+                        <a id="userListBtn">참여중인 사람들 보기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer id="footer"></footer>
+    <script>
+            
+            let searchParams = new URLSearchParams(window.location.search)
+            let projectId = searchParams.get('id')
+            
+            axiosInstance.get(`/project/${projectId}`, {
+                params: {
+                }
+            })
+            .then(function (res) {
+
+                console.log(res);
+                
+                $('#title').text(res.data.data.project.title)
+                $('#description').text(res.data.data.project.description)
+                $('#proofMethod').text(res.data.data.project.proof_method)
+                $('#projectImg').attr('src', res.data.data.project.img_url)
+
+                console.log('내프로젝트?',res.data.data.project.is_my_project);
+
+                let isMyProject = res.data.data.project.is_my_project;
+                let myLastStatus = res.data.data.project.my_last_status;
+                $("#applyButton").attr('disabled', myLastStatus == "ONGOING");
+
+                $("#giveUpButton").attr("disabled",myLastStatus!="ONGOING");
+                
+                let myTodayProof = res.data.data.project.my_today_proof;
+                
+                $("#proofButton").attr("disabled", myTodayProof != null);
+                $("#proofButton").click(function(){
+                    if (myTodayProof != null){
+                        alert("오늘의 인증을 이미 끝내셨습니다.");
+                        location.reload();
+                    }
+                })
+                
+                if(myLastStatus != "COMPLETE"){
+                    $("#completeInfo").hide();
+                }
+                else{
+
+                    let totalDays=res.data.data.project.total_day;
+                    $("#totalDaySpan").text(`${totalDays}일`)
+
+                    let completeDays = res.data.data.project.complete_days;
+                    let percent = completeDays / totalDays * 100;
+
+
+                    percent = percent.toFixed(1);
+                    $("#proofPercentSpan").text(`${percent}%`);
+                }
+
+
+                console.log("참여인원수:",res.data.data.project.ongoing_users_count);
+
+                let userCount = res.data.data.project.ongoing_users_count;
+                $("#userCount").text(`현재 참여 인원 : ${userCount}명`);
+
+                res.data.data.project.tags.forEach(tag => {
+                    console.log(tag);
+                    let tagSpan = $(`
+                        <a href=""><span class="tag">#${tag.title}</span></a>
+                    `);
+                    $("#tagsDiv").append(tagSpan);
+                });
+
+            })
+            .catch(function (error) {
+                alert(error.response.data.message)
+            })
+
+            $("#giveUpButton").click(function(){
+                let giveUp = confirm("정말 포기하시겠습니까?")
+                if(giveUp){
+                    axiosInstance.delete('/project',{
+                        params : {
+                            "project_id" : projectId
+                        }
+                    })
+                    .then(function(res){
+                        console.log(res);
+                        alert("프로젝트 참여를 포기했습니다.");
+                        location.reload();
+                    })
+                    .catch(function(err){
+                        console.log(err);
+                    })
+                }
+            })
+
+            $("#completeProofsBtn").click(function(){
+                $(location).attr('href',`complete_project_proofs.html?project_id=${projectId}`);
+            })
+
+
+            $("#userListBtn").click(function(){
+                $(location).attr('href',`user_list.html?project_id=${projectId}`);
+            })
+
+            $("#proofButton").click(function(){
+                $(location).attr('href', `proof_today.html?project_id=${projectId}`);
+            })
+
+            $("#viewProofButton").click(function(){
+                $(location).attr('href',`view_project_proof.html?project_id=${projectId}`);
+            })
+
+    </script>
+    <script>
+       $('#applyButton').click(function() {
+           console.log($.cookie('userToken'));
+
+            let searchParams = new URLSearchParams(window.location.search)
+            let projectId = searchParams.get('id')
+
+            const form = new FormData()
+            form.append('project_id', projectId)
+
+            axiosInstance.post(`/project`, form)
+            .then(function (res) {
+
+                console.log(res)
+
+                alert('신청이 완료 되었습니다.')
+                location.reload();
+
+            })
+            .catch(function (error) {
+                alert(error.response.data.message)
+            })
+
+        })
+    </script>
+</body>
+</html>
+

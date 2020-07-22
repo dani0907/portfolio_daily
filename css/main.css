@@ -1,0 +1,291 @@
+@charset "UTF-8";
+*, *:after, *:before {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  line-height: 1.5;
+  color: #333;
+  font-family: "Roboto","Noto Sans KR","돋움",sans-serif;
+  overflow-x: hidden;
+}
+
+.main {
+  margin-top: 180px;
+  width: 100vw;
+}
+
+.userHeader {
+  width: 1540px;
+  margin: auto;
+  padding-top: 10px;
+  font-size: 1.6rem;
+}
+
+.userHeader .userHeaderLeft {
+  float: left;
+  display: block;
+}
+
+.userHeader .userHeaderLeft #nickNameTxt {
+  margin-right: 10px;
+}
+
+.userHeader .userHeaderLeft button {
+  margin-right: 5px;
+  background-color: transparent;
+  border: 1px solid #333;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.userHeader .userHeaderLeft button:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.userHeader .userHeaderLeft button#notificationBtn {
+  border: none;
+  text-decoration: underline;
+}
+
+.userHeader .userHeaderLeft button#notificationBtn:hover {
+  background-color: transparent;
+  color: #333;
+}
+
+.userHeader .userHeaderRight {
+  float: right;
+  display: block;
+}
+
+.userHeader .userHeaderRight #keywordInput {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+}
+
+.userHeader .userHeaderRight #searchBtn {
+  margin-left: 10px;
+  background-color: transparent;
+  border: 1px solid #333;
+}
+
+#mainVisual {
+  width: 1540px;
+  height: 600px;
+  overflow: hidden;
+  margin: auto;
+  padding-top: 10px;
+}
+
+#mainVisual ul li.visual01 .bg {
+  background: url("../images/main/main_visual_01.png");
+}
+
+#mainVisual ul li.visual02 .bg {
+  background: url("../images/main/main_visual_02.png");
+}
+
+#mainVisual ul li .bg {
+  width: 100%;
+  height: 600px;
+  background-size: cover;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+
+#topicList {
+  width: 1540px;
+  margin: auto;
+  padding: 50px 0;
+  position: relative;
+}
+
+#topicList .title {
+  padding-bottom: 100px;
+  width: 100%;
+  position: relative;
+}
+
+#topicList .title h2 {
+  position: absolute;
+  left: 10px;
+  font-size: 3.6rem;
+  font-weight: 700;
+  bottom: 50px;
+}
+
+#topicList .title a {
+  position: absolute;
+  right: 10px;
+  bottom: 50px;
+}
+
+#topicList .title:after {
+  position: absolute;
+  content: '';
+  height: 2px;
+  width: 100%;
+  background-color: #000;
+  bottom: 40px;
+}
+
+#topicList .topicMask {
+  width: 1270px;
+  margin: auto;
+  overflow: hidden;
+}
+
+#topicList #projectList {
+  width: 1270px;
+  margin: 0 auto 60px;
+  padding: 50px 0;
+}
+
+#topicList #projectList li {
+  position: relative;
+  width: 370px;
+  height: 500px;
+  float: left;
+  overflow: hidden;
+  margin-right: 80px;
+  cursor: pointer;
+}
+
+#topicList #projectList li:before {
+  content: '';
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.2);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+#topicList #projectList li:after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  z-index: 3;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+#topicList #projectList li img {
+  height: 100%;
+}
+
+#topicList #projectList li p {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  right: 40px;
+  z-index: 2;
+  font-size: 2.6rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+#topicList #projectList li:hover:after {
+  border-color: white;
+  -webkit-transition: 0.25s ease;
+  transition: 0.25s ease;
+}
+
+#topicList #projectList li:hover:before {
+  background-color: rgba(0, 0, 0, 0.5);
+  -webkit-transition: 0.25s ease;
+  transition: 0.25s ease;
+}
+
+#topicList #projectList li:hover p {
+  color: white;
+  -webkit-transition: 0.25s ease;
+  transition: 0.25s ease;
+}
+
+#topicList #projectList li:hover img {
+  -webkit-transform: scale(1.2);
+          transform: scale(1.2);
+  -webkit-transition: 0.25s ease;
+  transition: 0.25s ease;
+}
+
+#topicList .swiperBtn {
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  width: 100%;
+  font-size: 3.6rem;
+  font-weight: 900;
+  z-index: 10;
+}
+
+#topicList .swiperBtn button {
+  background-color: transparent;
+  border: none;
+  font-size: 3.6rem;
+  cursor: pointer;
+}
+
+#topicList .swiperBtn .prevBtn {
+  float: left;
+  margin-left: 20px;
+}
+
+#topicList .swiperBtn .nextBtn {
+  float: right;
+  margin-right: 20px;
+}
+
+#review {
+  width: 1540px;
+  margin: auto;
+  padding-bottom: 50px;
+  position: relative;
+}
+
+#review .title {
+  padding-bottom: 100px;
+  width: 100%;
+  position: relative;
+}
+
+#review .title h2 {
+  position: absolute;
+  left: 10px;
+  font-size: 3.6rem;
+  font-weight: 700;
+  bottom: 50px;
+}
+
+#review .title a {
+  position: absolute;
+  right: 10px;
+  bottom: 50px;
+}
+
+#review .title:after {
+  position: absolute;
+  content: '';
+  height: 2px;
+  width: 100%;
+  background-color: #000;
+  bottom: 40px;
+}

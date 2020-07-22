@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/swiper.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/sub_pages.css">
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="../js/custom_axios.js"></script>
+    <script src="../js/main.js"defer></script>
+</head>
+<body>
+    <!-- <header id="header"></header> -->
+    <div id="signUpPage">
+        <div class="inner">
+            <div class="wrapper">
+                <a href="../html/main.html"><img class="logo" src="../images/layout/daily10min_dark.png" alt=""></a>
+                
+                <div class="signUpWrapper">
+                    <h1 class="title">Sign Up</h1>
+                
+                    <div class="signUp">
+                        <label for="emailInput"><span>Email</span><input type="text" id="emailInput" placeholder="이메일 입력"></label>
+                        <label for="pwInput"><span>Password</span><input type="password" id="pwInput" placeholder="비밀번호 입력"></label>
+                        <label for="nickNameInput"><span>NickName</span><input type="text" id="nickNameInput" placeholder="닉네임 입력"></label>
+                    </div>
+                
+                    <button id="signUpBtn">SignUp</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <footer id="footer"></footer> -->
+
+    <script>
+        $("#signUpBtn").click(function(){
+            let email = $("#emailInput").val();
+            let pw = $("#pwInput").val();
+            let nick = $("#nickNameInput").val();
+    
+            const form = new FormData();
+            form.append("email",email);
+            form.append("password",pw);
+            form.append("nick_name",nick);
+    
+            axiosInstance.put('/user',form)
+                .then(function(res){
+                    if(res.data.code == 200){
+                        alert('회원가입 성공');
+                        $(location).attr('href',"login.html");
+                    }   
+                })
+                .catch(function(error){
+                    alert(error.response.data.message);
+                })
+        })
+    </script>
+</body>
+</html>
+
